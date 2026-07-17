@@ -21,8 +21,16 @@ if ($dbUrl) {
 
 // Konfigurasi Website
 define('SITE_NAME', 'PLN Pekanbaru - Info Pemadaman Listrik');
-$siteUrl = getenv('SITE_URL') ?: 'http://localhost/pln-pekanbaru';
-define('SITE_URL', $siteUrl);
+$siteUrl = getenv('SITE_URL');
+if (!$siteUrl) {
+    if (isset($_SERVER['HTTP_HOST'])) {
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
+        $siteUrl = $protocol . $_SERVER['HTTP_HOST'];
+    } else {
+        $siteUrl = 'http://localhost/pln-pekanbaru';
+    }
+}
+define('SITE_URL', rtrim($siteUrl, '/'));
 define('ADMIN_URL', SITE_URL . '/admin');
 
 // Konfigurasi Peta
