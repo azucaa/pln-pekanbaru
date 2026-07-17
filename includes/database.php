@@ -8,13 +8,13 @@ class Database {
     private function __construct() {
         try {
             if (defined('DB_DRIVER') && DB_DRIVER === 'pgsql') {
-                $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
-                
-                // Workaround for older libpq versions on Vercel without SNI support (Neon requirement)
+                // Neon requires SNI support. For older libpq (like Vercel's),
+                // we pass the endpoint via PGOPTIONS environment variable.
                 if (strpos(DB_HOST, '.neon.tech') !== false) {
                     $endpointId = explode('.', DB_HOST)[0];
-                    $dsn .= ";options=endpoint%3D" . $endpointId;
+                    putenv("PGOPTIONS=endpoint=$endpointId");
                 }
+                $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
             } else {
                 $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
             }
