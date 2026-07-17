@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLN Pekanbaru - Info Pemadaman Listrik</title>
+    
+    <link rel="icon" type="image/x-icon" href="assets/images/pln-logo.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-main">
+            <div class="container">
+                <div class="logo">
+                    <img src="assets/images/pln-logo.png" alt="PLN Logo">
+                    <div class="logo-text">
+                        <h1>PLN PEKANBARU</h1>
+                        <span>Info Pemadaman Listrik</span>
+                    </div>
+                </div>
+                <nav>
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="active">Beranda</a></li>
+                        <li><a href="#peta">Peta</a></li>
+                        <li><a href="#status">Status</a></li>
+                        <li><a href="admin/login.php" class="btn-admin">Admin</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h2><i class="fas fa-bolt"></i> Informasi Pemadaman Listrik</h2>
+                        <p>Pantau status pemadaman listrik real-time di wilayah Kota Pekanbaru dan sekitarnya.</p>
+                        <div class="hero-stats">
+                            <div class="stat-card">
+                                <div class="number">2</div>
+                                <div class="label">Darurat</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="number">3</div>
+                                <div class="label">Gangguan</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="number">5</div>
+                                <div class="label">Terencana</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Cards -->
+            <section class="status-section">
+                <div class="status-grid">
+                    <div class="status-card darurat" onclick="filterMap('darurat')">
+                        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h3>Pemadaman Darurat</h3>
+                        <div class="count">2</div>
+                    </div>
+                    <div class="status-card gangguan" onclick="filterMap('gangguan')">
+                        <div class="icon"><i class="fas fa-bolt"></i></div>
+                        <h3>Gangguan Listrik</h3>
+                        <div class="count">3</div>
+                    </div>
+                    <div class="status-card terencana" onclick="filterMap('terencana')">
+                        <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h3>Pemadaman Terencana</h3>
+                        <div class="count">5</div>
+                    </div>
+                    <div class="status-card terdampak" onclick="filterMap('terdampak')">
+                        <div class="icon"><i class="fas fa-home"></i></div>
+                        <h3>Pelanggan Terdampak</h3>
+                        <div class="count">1,245</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Map Section -->
+            <section class="map-section" id="peta">
+                <div class="map-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Peta Pemadaman Listrik</h2>
+                    <div class="map-filters">
+                        <button class="filter-btn active" onclick="filterMap('all')">
+                            <span class="dot" style="background: #666;"></span> Semua
+                        </button>
+                        <button class="filter-btn" onclick="filterMap('darurat')">
+                            <span class="dot" style="background: #ef4444;"></span> Darurat
+                        </button>
+                        <button class="filter-btn" onclick="filterMap('gangguan')">
+                            <span class="dot" style="background: #eab308;"></span> Gangguan
+                        </button>
+                        <button class="filter-btn" onclick="filterMap('terencana')">
+                            <span class="dot" style="background: #3b82f6;"></span> Terencana
+                        </button>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <div class="map-legend">
+                    <div class="legend-title">Keterangan:</div>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-icon darurat"><i class="fas fa-exclamation"></i></div>
+                            <span>Darurat - Butuh perhatian segera</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-icon gangguan"><i class="fas fa-bolt"></i></div>
+                            <span>Gangguan - Sedang diperbaiki</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-icon terencana"><i class="fas fa-calendar"></i></div>
+                            <span>Terencana - Maintenance rutin</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-icon terdampak"><i class="fas fa-home"></i></div>
+                            <span>Terdampak - Area pelanggan terkena</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Table Section -->
+            <section class="table-section" id="status">
+                <div class="table-header">
+                    <h2><i class="fas fa-list-alt"></i> Daftar Pemadaman Terbaru</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchTable" placeholder="Cari pemadaman..." onkeyup="searchTable()">
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Judul</th>
+                                <th>Area</th>
+                                <th>Status</th>
+                                <th>Mulai</th>
+                                <th>Estimasi</th>
+                                <th>Pelanggan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>PAD-2024-001</strong></td>
+                                <td>Pemadaman Terencana Maintenance</td>
+                                <td>Sail</td>
+                                <td><span class="status-badge terencana">Terencana</span></td>
+                                <td>05 Mar 2024 08:00</td>
+                                <td>240 menit</td>
+                                <td>150</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="showDetail(1)">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>PAD-2024-002</strong></td>
+                                <td>Gangguan Jaringan Tegangan Menengah</td>
+                                <td>Perhentian Marpoyan</td>
+                                <td><span class="status-badge gangguan">Gangguan</span></td>
+                                <td>03 Mar 2024 14:30</td>
+                                <td>180 menit</td>
+                                <td>320</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="showDetail(2)">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>PAD-2024-003</strong></td>
+                                <td>Darurat Kebakaran Gardu Listrik</td>
+                                <td>Tangkerang Utara</td>
+                                <td><span class="status-badge darurat">Darurat</span></td>
+                                <td>03 Mar 2024 16:00</td>
+                                <td>360 menit</td>
+                                <td>580</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="showDetail(3)">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>PAD-2024-004</strong></td>
+                                <td>Pemadaman Terencana Penggantian Trafo</td>
+                                <td>Sidomulyo Timur</td>
+                                <td><span class="status-badge terencana">Terencana</span></td>
+                                <td>08 Mar 2024 09:00</td>
+                                <td>360 menit</td>
+                                <td>95</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="showDetail(4)">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Notification Section -->
+            <section class="notification-section" id="notifikasi">
+                <div class="table-header" style="margin-bottom: 20px;">
+                    <h2><i class="fas fa-bell"></i> Pengumuman & Notifikasi</h2>
+                </div>
+                <div class="notification-grid">
+                    <div class="notification-card info">
+                        <div class="notification-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>Info Pemadaman Terencana</h4>
+                            <p>Akan ada pemadaman terencana pada 2 hari mendatang di wilayah Sail. Mohon persiapkan diri Anda.</p>
+                            <div class="notification-date">
+                                <i class="fas fa-clock"></i> 03 Mar 2024 10:00
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notification-card warning">
+                        <div class="notification-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>Peringatan Cuaca Buruk</h4>
+                            <p>Diperingatkan cuaca buruk yang dapat menyebabkan gangguan listrik. PLN siaga 24 jam.</p>
+                            <div class="notification-date">
+                                <i class="fas fa-clock"></i> 03 Mar 2024 08:00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3><i class="fas fa-bolt"></i> PLN Pekanbaru</h3>
+                    <p>Sistem Informasi Pemadaman Listrik PLN Kota Pekanbaru. Memberikan informasi real-time tentang pemadaman listrik untuk kenyamanan Anda.</p>
+                    <div style="margin-top: 20px;">
+                        <p><i class="fas fa-map-marker-alt"></i> Jl. Jenderal Sudirman No. 123, Pekanbaru</p>
+                        <p><i class="fas fa-phone"></i> Call Center: 123</p>
+                        <p><i class="fas fa-envelope"></i> pln.pekanbaru@pln.co.id</p>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="#peta">Peta Pemadaman</a></li>
+                        <li><a href="#status">Status Listrik</a></li>
+                        <li><a href="#notifikasi">Pengumuman</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Layanan PLN</h4>
+                    <ul>
+                        <li><a href="https://www.pln.co.id" target="_blank">Website PLN</a></li>
+                        <li><a href="https://portal.pln.co.id" target="_blank">Portal Pelanggan</a></li>
+                        <li><a href="https://apps.pln.co.id" target="_blank">PLN Mobile</a></li>
+                        <li><a href="#">Cek Tagihan</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Bantuan</h4>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Hubungi Kami</a></li>
+                        <li><a href="#">Syarat & Ketentuan</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 PT PLN (Persero) Area Pekanbaru. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Detail Pemadaman</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <div class="info-window">
+                    <h4>Pemadaman Terencana Maintenance</h4>
+                    <span class="status-badge terencana">TERENCANA</span>
+                    <div class="info-row">
+                        <span class="info-label">Kode:</span>
+                        <span class="info-value">PAD-2024-001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Area:</span>
+                        <span class="info-value">Sail</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Alamat:</span>
+                        <span class="info-value">Jl. Sudirman, Kel. Sail, Kec. Tenayan Raya</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mulai:</span>
+                        <span class="info-value">05 Mar 2024 08:00</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Estimasi:</span>
+                        <span class="info-value">240 menit</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Pelanggan:</span>
+                        <span class="info-value">150 pelanggan</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Petugas:</span>
+                        <span class="info-value">Tim Maintenance A</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value"><span class="status-badge menunggu">MENUNGGU</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Sample data for demo
+        const pemadamanData = [
+            { id: 1, judul: 'Pemadaman Terencana Maintenance', status: 'terencana', lat: 0.5071, lng: 101.4478, radius: 500, kode_pemadaman: 'PAD-2024-001', nama_area: 'Sail', alamat: 'Jl. Sudirman, Kel. Sail', pelanggan_terdampak: 150, pelanggan_list: [
+                { no: '5210012345', nama: 'Budi Santoso', alamat: 'Jl. Sudirman No. 12' },
+                { no: '5210012346', nama: 'Siti Aminah', alamat: 'Jl. Sudirman No. 15' },
+                { no: '5210012347', nama: 'Ahmad Wijaya', alamat: 'Jl. Sudirman No. 18' }
+            ]},
+            { id: 2, judul: 'Gangguan Jaringan Tegangan Menengah', status: 'gangguan', lat: 0.5123, lng: 101.4567, radius: 800, kode_pemadaman: 'PAD-2024-002', nama_area: 'Perhentian Marpoyan', alamat: 'Jl. Tambusai', pelanggan_terdampak: 320, pelanggan_list: [
+                { no: '5210013456', nama: 'Dewi Kusuma', alamat: 'Jl. Tambusai No. 45' },
+                { no: '5210013457', nama: 'Rudi Hartono', alamat: 'Jl. Tambusai No. 48' },
+                { no: '5210013458', nama: 'Maya Sari', alamat: 'Jl. Tambusai No. 52' }
+            ]},
+            { id: 3, judul: 'Darurat Kebakaran Gardu Listrik', status: 'darurat', lat: 0.4987, lng: 101.4389, radius: 1200, kode_pemadaman: 'PAD-2024-003', nama_area: 'Tangkerang Utara', alamat: 'Jl. Nangka', pelanggan_terdampak: 580, pelanggan_list: [
+                { no: '5210045678', nama: 'Agus Salim', alamat: 'Jl. Nangka No. 23' },
+                { no: '5210045679', nama: 'Lisa Putri', alamat: 'Jl. Nangka No. 25' },
+                { no: '5210045680', nama: 'Doni Pratama', alamat: 'Jl. Nangka No. 28' }
+            ]},
+            { id: 4, judul: 'Pemadaman Terencana Penggantian Trafo', status: 'terencana', lat: 0.5234, lng: 101.4654, radius: 400, kode_pemadaman: 'PAD-2024-004', nama_area: 'Sidomulyo Timur', alamat: 'Jl. Melati', pelanggan_terdampak: 95, pelanggan_list: [
+                { no: '5210056789', nama: 'Eko Saputra', alamat: 'Jl. Melati No. 5' },
+                { no: '5210056790', nama: 'Nina Indah', alamat: 'Jl. Melati No. 8' }
+            ]}
+        ];
+        
+        const statusColors = {
+            darurat: '#ef4444',
+            gangguan: '#eab308',
+            terencana: '#3b82f6',
+            terdampak: '#06b6d4'
+        };
+        
+        const statusIcons = {
+            darurat: 'exclamation',
+            gangguan: 'bolt',
+            terencana: 'calendar',
+            terdampak: 'home'
+        };
+        
+        // Initialize map
+        const map = L.map('map').setView([0.5071, 101.4478], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        let markers = [];
+        let circles = [];
+        
+        function createCustomIcon(status) {
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    background-color: ${statusColors[status]};
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    border: 3px solid white;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    font-size: 14px;
+                "><i class="fas fa-${statusIcons[status]}"></i></div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+        }
+        
+        function addMarkers(filter = 'all') {
+            markers.forEach(m => map.removeLayer(m));
+            circles.forEach(c => map.removeLayer(c));
+            markers = [];
+            circles = [];
+            
+            pemadamanData.forEach(item => {
+                if (filter !== 'all' && item.status !== filter) return;
+                
+                const marker = L.marker([item.lat, item.lng], {
+                    icon: createCustomIcon(item.status)
+                }).addTo(map);
+                
+                const pelangganListHtml = item.pelanggan_list ? item.pelanggan_list.map(p => 
+                    `<div class="pelanggan-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <strong>${p.nama}</strong><br>
+                            <small>No: ${p.no}</small><br>
+                            <small>${p.alamat}</small>
+                        </div>
+                    </div>`
+                ).join('') : '';
+                
+                const popupContent = `
+                    <div class="info-window">
+                        <h4>${item.judul}</h4>
+                        <span class="status-badge ${item.status}">${item.status.toUpperCase()}</span>
+                        <div class="info-row">
+                            <span class="info-label">Kode:</span>
+                            <span class="info-value">${item.kode_pemadaman}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Area:</span>
+                            <span class="info-value">${item.nama_area || '-'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Alamat:</span>
+                            <span class="info-value">${item.alamat || '-'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total Pelanggan:</span>
+                            <span class="info-value">${item.pelanggan_terdampak} pelanggan</span>
+                        </div>
+                        <div class="pelanggan-terdampak">
+                            <h5><i class="fas fa-users"></i> Pelanggan Terdampak:</h5>
+                            <div class="pelanggan-list">
+                                ${pelangganListHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+                
+                const circle = L.circle([item.lat, item.lng], {
+                    color: statusColors[item.status],
+                    fillColor: statusColors[item.status],
+                    fillOpacity: 0.2,
+                    radius: item.radius
+                }).addTo(map);
+                
+                circles.push(circle);
+            });
+        }
+        
+        function filterMap(status) {
+            addMarkers(status);
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.filter-btn').classList.add('active');
+        }
+        
+        function showDetail(id) {
+            document.getElementById('detailModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+        
+        function searchTable() {
+            const input = document.getElementById('searchTable');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('dataTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+        
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        addMarkers();
+    </script>
+</body>
+</html>

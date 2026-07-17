@@ -1,0 +1,8 @@
+{
+    "name": "pln-pekanbaru",
+    "description": "Sistem Informasi Pemadaman Listrik PLN Pekanbaru",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    }
+}
