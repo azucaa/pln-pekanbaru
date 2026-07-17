@@ -2,6 +2,74 @@
 require_once 'config.php';
 require_once 'database.php';
 
+class DatabaseSessionHandler implements SessionHandlerInterface {
+    private $db;
+
+    public function __construct() {
+        $this->db = Database::getInstance();
+    }
+
+    public function open($path, $name): bool {
+        return true;
+    }
+
+    public function close(): bool {
+        return true;
+    }
+
+    public function read($id): string|false {
+        try {
+            $row = $this->db->fetch("SELECT data FROM sessions WHERE id = :id", ['id' => $id]);
+            return $row ? $row['data'] : '';
+        } catch (Exception $e) {
+            return '';
+        }
+    }
+
+    public function write($id, $data): bool {
+        try {
+            if (defined('DB_DRIVER') && DB_DRIVER === 'pgsql') {
+                $this->db->query(
+                    "INSERT INTO sessions (id, data) VALUES (:id, :data) 
+                     ON CONFLICT (id) DO UPDATE SET data = :data, last_access = CURRENT_TIMESTAMP",
+                    ['id' => $id, 'data' => $data]
+                );
+            } else {
+                $this->db->query(
+                    "INSERT INTO sessions (id, data) VALUES (:id, :data) 
+                     ON DUPLICATE KEY UPDATE data = :data, last_access = CURRENT_TIMESTAMP",
+                    ['id' => $id, 'data' => $data]
+                );
+            }
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function destroy($id): bool {
+        try {
+            $this->db->query("DELETE FROM sessions WHERE id = :id", ['id' => $id]);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function gc($max_lifetime): int|false {
+        try {
+            if (defined('DB_DRIVER') && DB_DRIVER === 'pgsql') {
+                $this->db->query("DELETE FROM sessions WHERE last_access < NOW() - INTERVAL '$max_lifetime seconds'");
+            } else {
+                $this->db->query("DELETE FROM sessions WHERE last_access < NOW() - INTERVAL $max_lifetime SECOND");
+            }
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+}
+
 class Auth {
     private static $instance = null;
     private $db;
@@ -21,6 +89,8 @@ class Auth {
     private function startSession() {
         if (session_status() == PHP_SESSION_NONE) {
             session_name(SESSION_NAME);
+            $handler = new DatabaseSessionHandler();
+            session_set_save_handler($handler, true);
             session_start();
         }
     }
