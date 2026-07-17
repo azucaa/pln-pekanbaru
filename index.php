@@ -21,7 +21,7 @@ $pemadaman = $db->fetchAll("SELECT p.*, a.nama_area, a.kecamatan
 
 // Ambil data notifikasi
 $notifikasi = $db->fetchAll("SELECT * FROM notifikasi 
-    WHERE is_active = 1 
+    WHERE is_active = true 
     AND (expires_at IS NULL OR expires_at > NOW())
     ORDER BY created_at DESC 
     LIMIT 4");
