@@ -57,14 +57,9 @@ define('SESSION_LIFETIME', 7200); // 2 jam
 // Timezone
 date_default_timezone_set('Asia/Jakarta');
 
-// Error Reporting (production: off, local: on)
-if (getenv('APP_ENV') === 'production') {
-    error_reporting(0);
-    ini_set('display_errors', 0);
-} else {
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
-}
+// Error Reporting (temporarily on to debug)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Fungsi helper
 function formatTanggal($date) {
