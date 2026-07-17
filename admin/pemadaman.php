@@ -1,7 +1,7 @@
 <?php
-require_once '../includes/config.php';
-require_once '../includes/database.php';
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 auth()->requireLogin();
 
