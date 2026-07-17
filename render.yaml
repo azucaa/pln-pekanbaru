@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: pln-pekanbaru
+    runtime: image
+    image:
+      dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: pln-pekanbaru-db
+          property: host
+      - key: DB_USER
+        fromDatabase:
+          name: pln-pekanbaru-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: pln-pekanbaru-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: pln-pekanbaru-db
+          property: database
+      - key: SITE_URL
+        sync: false
+      - key: APP_ENV
+        value: production
+
+databases:
+  - name: pln-pekanbaru-db
+    plan: free
+    databaseName: pln_pekanbaru
+    ipAllowList: []
