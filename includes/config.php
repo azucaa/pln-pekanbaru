@@ -1,9 +1,23 @@
 <?php
-// Konfigurasi Database (env vars for Railway, fallback for local)
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
-define('DB_NAME', getenv('DB_NAME') ?: 'pln_pekanbaru');
+// Konfigurasi Database
+// Render gives a single DATABASE_URL for Postgres. Local dev uses individual vars.
+$dbUrl = getenv('DATABASE_URL');
+if ($dbUrl) {
+    $parsed = parse_url($dbUrl);
+    define('DB_HOST', $parsed['host']);
+    define('DB_PORT', $parsed['port'] ?? '5432');
+    define('DB_USER', $parsed['user']);
+    define('DB_PASS', $parsed['pass']);
+    define('DB_NAME', ltrim($parsed['path'], '/'));
+    define('DB_DRIVER', 'pgsql');
+} else {
+    define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+    define('DB_PORT', getenv('DB_PORT') ?: '3306');
+    define('DB_USER', getenv('DB_USER') ?: 'root');
+    define('DB_PASS', getenv('DB_PASS') ?: '');
+    define('DB_NAME', getenv('DB_NAME') ?: 'pln_pekanbaru');
+    define('DB_DRIVER', 'mysql');
+}
 
 // Konfigurasi Website
 define('SITE_NAME', 'PLN Pekanbaru - Info Pemadaman Listrik');
