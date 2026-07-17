@@ -26,14 +26,25 @@ $pemadaman_terbaru = $db->fetchAll("SELECT p.*, a.nama_area, adm.nama_lengkap as
     LIMIT 5");
 
 // Data untuk grafik (7 hari terakhir)
-$grafik_data = $db->fetchAll("SELECT 
-    DATE(created_at) as tanggal,
-    COUNT(*) as jumlah,
-    SUM(pelanggan_terdampak) as pelanggan
-    FROM pemadaman 
-    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    GROUP BY DATE(created_at)
-    ORDER BY tanggal");
+if (defined('DB_DRIVER') && DB_DRIVER === 'pgsql') {
+    $grafik_data = $db->fetchAll("SELECT 
+        CAST(created_at AS DATE) as tanggal,
+        COUNT(*) as jumlah,
+        SUM(pelanggan_terdampak) as pelanggan
+        FROM pemadaman 
+        WHERE created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY CAST(created_at AS DATE)
+        ORDER BY tanggal");
+} else {
+    $grafik_data = $db->fetchAll("SELECT 
+        DATE(created_at) as tanggal,
+        COUNT(*) as jumlah,
+        SUM(pelanggan_terdampak) as pelanggan
+        FROM pemadaman 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY tanggal");
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
